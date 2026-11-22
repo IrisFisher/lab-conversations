@@ -59,7 +59,7 @@ def create_conversation(path, title):
             "INSERT INTO conversations (title) VALUES (?)", (title,)
         ).lastrowid
         db.commit()
-        return result
+    return result
 
 
 def list_conversations(path):
@@ -71,7 +71,7 @@ def list_conversations(path):
         result = db.execute(
             "SELECT id, title FROM conversations ORDER BY id DESC"
         ).fetchall()
-    return list(result) if result is not None else None
+    return list(result) if result else None
 
 
 def add_message(path, conversation_id, role, content):
@@ -80,7 +80,12 @@ def add_message(path, conversation_id, role, content):
     conversation_id refers to an existing conversation; role is either 'user'
     or 'assistant'. Store content exactly as given, including quotes/newlines.
     """
-    raise NotImplementedError("Complete add_message")
+    with connect(path) as db:
+        result = db.execute(
+            "INSERT INTO messages (conversation_id, role, content) VALUES (?, ?, ?)", (conversation_id, role, content)
+        ).lastrowid
+        db.commit()
+    return result
 
 
 def get_messages(path, conversation_id):
@@ -89,7 +94,11 @@ def get_messages(path, conversation_id):
     Each dictionary has keys id, conversation_id, role, and content.
     Return [] when there are no messages for that conversation.
     """
-    raise NotImplementedError("Complete get_messages")
+    with connect(path) as db:
+        result = db.execute(
+            "SELECT id, conversation_id, role, content FROM messages WHERE conversation_id = ? ORDER BY id ASC", (conversation_id,)
+        ).fetchall()
+    return list(result) if result else None
 
 
 def search_messages(path, term):
@@ -100,4 +109,9 @@ def search_messages(path, term):
     Match ASCII letters without regard to case. An empty term matches every
     message. LIKE's % and _ wildcards keep their usual meaning.
     """
-    raise NotImplementedError("Complete search_messages")
+    with connect(path) as db:
+        pattern = '%' + term + '%'
+        result = db.execute(
+            "SELECT messages.id, conversations.title, messages.role, messages.content FROM messages JOIN conversations ON messages.conversation_id = conversations.id WHERE messages.content LIKE ? ORDER BY messages.id ASC", (pattern,)
+        ).fetchall()
+    return list(result) if result else []
