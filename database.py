@@ -73,7 +73,7 @@ def list_conversations(path):
                     "SELECT id, title FROM conversations ORDER BY id DESC"
                     ).fetchall()):
             result.append({"id": row[0], "title": row[1]})
-    return list(result) if result else None
+    return list(result)
 
 
 def add_message(path, conversation_id, role, content):
@@ -102,7 +102,7 @@ def get_messages(path, conversation_id):
                         "SELECT id, conversation_id, role, content FROM messages WHERE conversation_id = ? ORDER BY id ASC", (conversation_id,)
                         ).fetchall()):
             result.append({"id": row[0], "conversation_id": row[1], "role": row[2], "content": row[3]})
-    return list(result) if result else None
+    return result
 
 
 def search_messages(path, term):
