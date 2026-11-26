@@ -115,7 +115,9 @@ def search_messages(path, term):
     """
     with connect(path) as db:
         pattern = '%' + term + '%'
-        result = db.execute(
-            "SELECT messages.id, conversations.title, messages.role, messages.content FROM messages JOIN conversations ON messages.conversation_id = conversations.id WHERE messages.content LIKE ? ORDER BY messages.id ASC", (pattern,)
-        ).fetchall()
-    return list(result) if result else []
+        result = []
+        for row in (db.execute(
+                    "SELECT messages.id, conversations.title, messages.role, messages.content FROM messages JOIN conversations ON messages.conversation_id = conversations.id WHERE messages.content LIKE ? ORDER BY messages.id ASC", (pattern,)
+                    ).fetchall()):
+            result.append({"id": row[0], "title": row[1], "role": row[2], "content": row[3]})
+    return result if result else []
