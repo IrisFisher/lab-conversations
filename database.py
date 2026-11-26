@@ -68,9 +68,11 @@ def list_conversations(path):
     Each item is a dictionary with keys id and title. Return [] when empty.
     """
     with connect(path) as db:
-        result = db.execute(
-            "SELECT id, title FROM conversations ORDER BY id DESC"
-        ).fetchall()
+        result = []
+        for row in (db.execute(
+                    "SELECT id, title FROM conversations ORDER BY id DESC"
+                    ).fetchall()):
+            result.append({"id": row[0], "title": row[1]})
     return list(result) if result else None
 
 
@@ -95,9 +97,11 @@ def get_messages(path, conversation_id):
     Return [] when there are no messages for that conversation.
     """
     with connect(path) as db:
-        result = db.execute(
-            "SELECT id, conversation_id, role, content FROM messages WHERE conversation_id = ? ORDER BY id ASC", (conversation_id,)
-        ).fetchall()
+        result = []
+        for row in (db.execute(
+                        "SELECT id, conversation_id, role, content FROM messages WHERE conversation_id = ? ORDER BY id ASC", (conversation_id,)
+                        ).fetchall()):
+            result.append({"id": row[0], "conversation_id": row[1], "role": row[2], "content": row[3]})
     return list(result) if result else None
 
 
